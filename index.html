@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>pay.mbnk.biz</title>
+    <style>
+        /* CSS ЗМІННІ ДЛЯ ТЕМ НАЛАШТУВАННЯ ТА СТАТИСТИКИ */
+        :root {
+            --menu-bg: #ffffff;
+            --menu-text: #111111;
+            --menu-subtext: #666666;
+            --menu-btn-bg: #6815d1;
+            --menu-btn-text: #ffffff;
+            --card-border: 1.5px solid #e0e0e0;
+            --main-bg: #f2f3f5;
+        }
+
+        /* ТЕМА 1: Neon Cyberpunk */
+        body.theme-cyberpunk {
+            --menu-bg: #0f0c20;
+            --menu-text: #00ffcc;
+            --menu-subtext: #ff007f;
+            --menu-btn-bg: linear-gradient(135deg, #ff007f, #7928ca);
+            --menu-btn-text: #ffffff;
+            --card-border: 1.5px solid #ff007f;
+            --main-bg: #05030a;
+        }
+
+        /* ТЕМА 2: Retro Gold / VIP Mono */
+        body.theme-vip {
+            --menu-bg: #1a1a1a;
+            --menu-text: #f39c12;
+            --menu-subtext: #bdc3c7;
+            --menu-btn-bg: linear-gradient(135deg, #f1c40f, #d35400);
+            --menu-btn-text: #000000;
+            --card-border: 1.5px solid #f1c40f;
+            --main-bg: #0d0d0d;
+        }
+
+        /* ТЕМА 3: Hacker Matrix */
+        body.theme-matrix {
+            --menu-bg: #001100;
+            --menu-text: #00ff00;
+            --menu-subtext: #008800;
+            --menu-btn-bg: #002200;
+            --menu-btn-text: #00ff00;
+            --card-border: 1.5px solid #00ff00;
+            --main-bg: #000500;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background-color: #000000;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #121212;
+        }
+
+        .phone-frame {
+            width: 100%;
+            height: 100%;
+            background-color: var(--main-bg);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Header Bar */
+        .app-bar {
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            height: 48px;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .app-bar-left, .app-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .url-text {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: -0.1px;
+        }
+
+        /* General Screen System (ФІКС БАГУ З КЛАВІАТУРОЮ) */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            height: calc(100% - 48px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* SCREEN 1: Setup/Input Screen */
+        .setup-screen {
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            text-align: center;
+            min-height: 100%;
+        }
+
+        .setup-card {
+            background: var(--menu-bg);
+            width: 100%;
+            border-radius: 24px;
+            padding: 28px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .setup-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--menu-text);
+        }
+
+        .setup-desc {
+            font-size: 13.5px;
+            color: var(--menu-subtext);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--menu-text);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            outline: none;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .input-field:focus {
+            border-color: #6815d1;
+        }
+
+        .type-preview {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--menu-text);
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
+        .type-choice-container {
+            margin-top: 14px;
+            text-align: left;
+        }
+
+        .type-choice-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--menu-text);
+            margin-bottom: 8px;
+        }
+
+        .type-choice-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f8f9fa;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .type-btn.active {
+            background: var(--menu-btn-bg);
+            color: var(--menu-btn-text);
+            border-color: transparent;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--menu-btn-bg);
+            color: var(--menu-btn-text);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: rgba(0,0,0,0.05);
+            color: var(--menu-text);
+            border: var(--card-border);
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* DASHBOARD SCREEN (STATS) */
+        .dashboard-screen {
+            padding: 24px 20px;
+            flex-direction: column;
+        }
+
+        .stats-card {
+            background: var(--menu-bg);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            margin-top: 20px;
+            border: var(--card-border);
+        }
+
+        .stats-title {
+            font-size: 15px;
+            color: var(--menu-subtext);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.03);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--menu-text);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--menu-subtext);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* ЕКРАН КВИТКА ТА ДЕТАЛЕЙ (ОРІГІНАЛЬНИЙ МОНО БЕЗ ЗМІН СТИЛІВ)   */
+        /* ------------------------------------------------------------- */
+        .ticker-wrapper {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 7px 0;
+            font-size: 13.5px;
+            font-weight: 500;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: marquee 18s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        .ticket-card-container {
+            padding: 16px 16px 0 16px;
+        }
+
+        .ticket-card {
+            background: #ffffff !important;
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            padding: 24px 20px 20px 20px;
+            position: relative;
+            color: #121212 !important;
+        }
+
+        .info-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid #d0d0d0;
+            color: #888888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-family: Georgia, serif;
+            font-style: italic;
+            cursor: pointer;
+        }
+
+        .avatar-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c084fc 0%, #d8b4fe 20%, #e879f9 50%, #ec4899 80%, #f43f5e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(217, 70, 239, 0.35);
+        }
+
+        .avatar svg {
+            width: 42px;
+            height: 42px;
+        }
+
+        .transport-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111111;
+            margin-bottom: 14px;
+        }
+
+        .divider-line {
+            height: 1px;
+            background-color: #eaeaea;
+            width: 70%;
+            margin: 0 auto 16px auto;
+        }
+
+        .purchase-date {
+            text-align: center;
+            color: #777777;
+            font-size: 13.5px;
+            margin-bottom: 10px;
+        }
+
+        .ticket-count {
+            text-align: center;
+            font-size: 38px;
+            font-weight: 900;
+            color: #000000;
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+        }
+
+        .status-badge {
+            width: fit-content;
+            margin: 0 auto 20px auto;
+            background: #dcfce7;
+            padding: 7px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .pulse-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #10b981;
+            position: relative;
+        }
+
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            border-radius: 50%;
+            background-color: #10b981;
+            animation: pulseRing 1.8s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.8); opacity: 0; }
+        }
+
+        .route-info {
+            text-align: center;
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .route-badge {
+            border: 1.5px dashed #b0b0b0;
+            border-radius: 8px;
+            padding: 2px 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .perforated-wrap {
+            background: #ffffff;
+            position: relative;
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cutout-left, .cutout-right {
+            width: 16px;
+            height: 16px;
+            background-color: #f2f3f5;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            z-index: 5;
+        }
+
+        .cutout-left { left: -8px; }
+        .cutout-right { right: -8px; }
+
+        .dashed-separator {
+            width: 100%;
+            border-top: 2px dashed #e5e7eb;
+            margin: 0 12px;
+        }
+
+        .qr-card {
+            background: #ffffff !important;
+            padding: 16px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .qr-box {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .qr-box svg {
+            width: 210px;
+            height: 210px;
+        }
+
+        .ticket-number {
+            text-align: center;
+            color: #666666;
+            font-size: 14.5px;
+            margin-top: 16px;
+            font-weight: 400;
+        }
+
+        .ticket-number strong {
+            color: #000000;
+            font-weight: 800;
+        }
+
+        .wavy-cutout-bottom {
+            height: 14px;
+            width: 100%;
+            background-color: #ffffff;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            -webkit-mask-image: radial-gradient(circle at 8px 18px, transparent 8px, #000 8.5px);
+            mask-image: radial-gradient(circle at 8px 18px, transparent 8px, #000 8.5px);
+            -webkit-mask-size: 16px 16px;
+            mask-size: 16px 16px;
+            -webkit-mask-repeat: repeat-x;
+            mask-repeat: repeat-x;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #71717a;
+            font-size: 13px;
+            line-height: 1.4;
+            padding: 20px 28px 36px 28px;
+        }
+
+        /* DETAILS SCREEN */
+        .details-screen-content {
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .back-nav {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .details-heading {
+            font-size: 26px;
+            font-weight: 500;
+            color: #111111;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+
+        .details-card {
+            background: #ffffff !important;
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            color: #111111 !important;
+        }
+
+        .details-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .details-label {
+            font-size: 14px;
+            color: #888888;
+            margin-bottom: 6px;
+        }
+
+        .details-val-main {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111111;
+        }
+
+        .details-row-split {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .details-val-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111111;
+        }
+
+        .details-item {
+            margin-bottom: 20px;
+        }
+
+        .mono-footer {
+            margin-top: auto;
+            padding: 24px 0 32px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .mono-logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #000;
+        }
+
+        .mono-logo span {
+            font-size: 9px;
+            display: block;
+            font-weight: 400;
+            color: #777;
+            margin-top: -2px;
+        }
+
+        .mono-divider {
+            width: 1px;
+            height: 24px;
+            background: #ccc;
+        }
+
+        .mono-legal {
+            font-size: 11px;
+            color: #777777;
+            line-height: 1.3;
+            max-width: 210px;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 48px;
+            right: 12px;
+            background: #222222;
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 8px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 200;
+            width: 200px;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #eee;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: #333333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+    <!-- Top Webview Bar -->
+    <div class="app-bar">
+        <div class="app-bar-left">
+            <button class="btn-icon" title="Закрити" onclick="handleCloseClick(event)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <button class="btn-icon" title="Згорнути" onclick="handleFoldClick(event)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+        </div>
+
+        <div class="url-text">pay.mbnk.biz</div>
+
+        <div class="app-bar-right">
+            <button class="btn-icon" title="Поділитися" onclick="handleShareClick(event)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
+            <button class="btn-icon" id="menuBtn" onclick="toggleMenu(event)" title="Меню">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2.2"></circle><circle cx="12" cy="12" r="2.2"></circle><circle cx="12" cy="19" r="2.2"></circle></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" onclick="setTheme('default')">⚪ Стандартна тема</div>
+        <div class="dropdown-item" onclick="setTheme('cyberpunk')">🔮 Neon Cyberpunk</div>
+        <div class="dropdown-item" onclick="setTheme('vip')">👑 VIP Gold Mono</div>
+        <div class="dropdown-item" onclick="setTheme('matrix')">📟 Hacker Matrix</div>
+        <div class="dropdown-item" onclick="resetStats()">🗑️ Скинути статистику</div>
+    </div>
+
+    <!-- SCREEN 1: INPUT/SETUP MENU -->
+    <div id="screen-setup" class="screen setup-screen active">
+        <div class="setup-card">
+            <div class="setup-title">Введіть номер транспорту</div>
+            <div class="setup-desc">3 цифри — Тролейбус / Трамвай<br>4 цифри — Автобус</div>
+
+            <div class="input-group">
+                <label for="routeInput">Номер борту / маршруту</label>
+                <input type="number" id="routeInput" class="input-field" placeholder="Наприклад: 314" oninput="detectTransportType()" onfocus="scrollToInput()">
+                
+                <div id="typePreview" class="type-preview"></div>
+
+                <div id="threeDigitChoice" class="type-choice-container" style="display: none;">
+                    <div class="type-choice-label">Оберіть тип транспорту:</div>
+                    <div class="type-choice-buttons">
+                        <button type="button" class="type-btn active" id="btnTrolleybus" onclick="select3DigitType('Тролейбус')">Тролейбус</button>
+                        <button type="button" class="type-btn" id="btnTram" onclick="select3DigitType('Трамвай')">Трамвай</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-submit" onclick="generateTicket()">Сформувати квиток</button>
+            <button class="btn-secondary" onclick="showScreen('screen-dashboard')">📊 Зекономлено коштів</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: STATS -->
+    <div id="screen-dashboard" class="screen dashboard-screen">
+        <div class="back-nav" onclick="showScreen('screen-setup')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </div>
+
+        <div class="details-heading" style="margin-top: 10px;">Статистика</div>
+
+        <div class="stats-card">
+            <div class="stats-title">Загальні заощадження</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-val" id="totalTripsCount">0</div>
+                    <div class="stat-label">Поїздок</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" id="totalMoneySaved">0 грн</div>
+                    <div class="stat-label">Зекономлено</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: TICKET VIEW (ОРІГІНАЛЬНИЙ КВИТОК) -->
+    <div id="screen-ticket" class="screen">
+        <div class="ticker-wrapper">
+            <div class="ticker-content" id="randomTickerText">
+                Радійтеся людьми і кричіть, що ви живі. Я живий! ◆ Живіть сьогоденням!
+            </div>
+        </div>
+
+        <div class="ticket-card-container">
+            <div class="ticket-card">
+                <div class="info-btn" onclick="showScreen('screen-details')">i</div>
+                
+                <div class="avatar-container">
+                    <div class="avatar">
+                        <svg viewBox="0 0 100 100">
+                            <polygon points="30,34 38,12 48,28" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                            <polygon points="70,34 62,12 52,28" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                            <rect x="26" y="24" width="48" height="48" rx="14" fill="#000000" stroke="#ffffff" stroke-width="3"/>
+                            <rect x="32" y="30" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="35" y="33" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <rect x="54" y="30" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="57" y="33" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <rect x="32" y="52" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="35" y="55" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <text x="61" y="64" font-family="sans-serif" font-weight="800" font-size="12" fill="#ffffff">%</text>
+                            <ellipse cx="23" cy="46" rx="6" ry="8" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                            <ellipse cx="77" cy="62" rx="8" ry="6" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="transport-title" id="displayTransportTitle">Тролейбус</div>
+                <div class="divider-line"></div>
+
+                <div class="purchase-date" id="displayPurchaseDate">Придбано 19 жовтня о 16:15</div>
+                <div class="ticket-count">1 квиток</div>
+
+                <div class="status-badge">
+                    <div class="pulse-dot"></div>
+                    <span>Квиток дійсний — <strong id="timer">59:41</strong></span>
+                </div>
+
+                <div class="route-info">
+                    <span id="displayTransportLabel">Тролейбус</span>
+                    <div class="route-badge" id="displayRouteBadge">№ 314</div>
+                </div>
+            </div>
+
+            <div class="perforated-wrap">
+                <div class="cutout-left"></div>
+                <div class="dashed-separator"></div>
+                <div class="cutout-right"></div>
+            </div>
+
+            <div class="qr-card">
+                <div class="qr-box">
+                    <svg viewBox="0 0 29 29" shape-rendering="crispEdges">
+                        <rect width="29" height="29" fill="#ffffff" />
+                        <path d="M1,1 h7 v7 h-7 z M2,2 v5 h5 v-5 z M3,3 h3 v3 h-3 z" fill="#000000" fill-rule="evenodd"/>
+                        <path d="M21,1 h7 v7 h-7 z M22,2 v5 h5 v-5 z M23,3 h3 v3 h-3 z" fill="#000000" fill-rule="evenodd"/>
+                        <path d="M1,21 h7 v7 h-7 z M2,22 v5 h5 v-5 z M3,23 h3 v3 h-3 z" fill="#000000" fill-rule="evenodd"/>
+                        <path d="
+                            M10,1 h2 v1 h-2 z M14,1 h1 v3 h-1 z M16,1 h3 v1 h-3 z M20,1 h1 v1 h-1 z
+                            M9,2 h1 v2 h-1 z M11,2 h2 v1 h-2 z M15,2 h2 v1 h-2 z M19,2 h1 v3 h-1 z
+                            M10,3 h1 v2 h-1 z M12,3 h1 v1 h-1 z M17,3 h1 v2 h-1 z
+                            M9,4 h2 v1 h-2 z M13,4 h3 v1 h-3 z M18,4 h2 v1 h-2 z
+                            M10,5 h3 v1 h-3 z M15,5 h1 v2 h-1 z M17,5 h3 v1 h-3 z
+                            M9,6 h1 v1 h-1 z M11,6 h2 v2 h-2 z M14,6 h2 v1 h-2 z M19,6 h1 v1 h-1 z
+                            M0,9 h9 v1 h-9 z M10,8 h2 v1 h-2 z M13,8 h1 v3 h-1 z M16,8 h4 v1 h-4 z M22,8 h6 v1 h-6 z
+                            M1,10 h2 v2 h-2 z M4,10 h1 v1 h-1 z M6,10 h2 v2 h-2 z M11,10 h2 v1 h-2 z M15,10 h3 v1 h-3 z M20,10 h2 v2 h-2 z M24,10 h3 v1 h-3 z
+                            M0,11 h1 v2 h-1 z M3,11 h2 v1 h-2 z M9,11 h1 v2 h-1 z M14,11 h1 v2 h-1 z M19,11 h1 v1 h-1 z M23,11 h1 v2 h-1 z M27,11 h1 v2 h-1 z
+                            M2,12 h3 v1 h-3 z M6,12 h1 v2 h-1 z M10,12 h3 v1 h-3 z M16,12 h2 v2 h-2 z M21,12 h1 v1 h-1 z M25,12 h2 v1 h-2 z
+                            M0,13 h2 v2 h-2 z M4,13 h1 v1 h-1 z M8,13 h2 v1 h-2 z M12,13 h1 v2 h-1 z M15,13 h1 v1 h-1 z M20,13 h3 v1 h-3 z M24,13 h1 v2 h-1 z
+                            M3,14 h2 v2 h-2 z M7,14 h1 v1 h-1 z M18,14 h2 v1 h-2 z M22,14 h1 v2 h-1 z M26,14 h2 v1 h-2 z
+                            M1,15 h1 v2 h-1 z M5,15 h3 v1 h-3 z M9,15 h2 v2 h-2 z M17,15 h1 v2 h-1 z M20,15 h1 v1 h-1 z M25,15 h1 v2 h-1 z
+                            M0,16 h3 v1 h-3 z M4,16 h1 v2 h-1 z M8,16 h1 v1 h-1 z M16,16 h3 v1 h-3 z M21,16 h3 v1 h-3 z M27,16 h1 v1 h-1 z
+                            M2,17 h1 v2 h-1 z M6,17 h2 v1 h-2 z M11,17 h3 v1 h-3 z M15,17 h1 v2 h-1 z M19,17 h1 v1 h-1 z M23,17 h2 v1 h-2 z M26,17 h2 v1 h-2 z
+                            M0,18 h2 v1 h-2 z M4,18 h2 v1 h-2 z M9,18 h1 v2 h-1 z M13,18 h2 v1 h-2 z M17,18 h2 v2 h-2 z M21,18 h1 v1 h-1 z M24,18 h2 v1 h-2 z
+                            M9,19 h2 v1 h-2 z M12,19 h3 v1 h-3 z M16,19 h1 v2 h-1 z M20,19 h3 v1 h-3 z M25,19 h3 v1 h-3 z
+                            M9,20 h8 v1 h-8 z M18,20 h2 v1 h-2 z M22,20 h1 v2 h-1 z M24,20 h2 v1 h-2 z M27,20 h1 v2 h-1 z
+                            M10,21 h1 v2 h-1 z M13,21 h2 v1 h-2 z M16,21 h3 v1 h-3 z M20,21 h1 v1 h-1 z M23,21 h2 v1 h-2 z
+                            M9,22 h3 v1 h-3 z M14,22 h1 v2 h-1 z M17,22 h1 v1 h-1 z M19,22 h3 v1 h-3 z M25,22 h3 v1 h-3 z
+                            M10,23 h1 v2 h-1 z M12,23 h2 v1 h-2 z M16,23 h2 v1 h-2 z M20,23 h1 v2 h-1 z M22,23 h2 v1 h-2 z M26,23 h1 v2 h-1 z
+                            M9,24 h2 v1 h-2 z M13,24 h1 v2 h-1 z M15,24 h3 v1 h-3 z M19,24 h1 v1 h-1 z M21,24 h3 v1 h-3 z M25,24 h1 v1 h-1 z
+                            M11,25 h1 v2 h-1 z M14,25 h3 v1 h-3 z M18,25 h2 v1 h-2 z M22,25 h1 v2 h-1 z M24,25 h2 v1 h-2 z M27,25 h1 v2 h-1 z
+                            M9,26 h2 v1 h-2 z M12,26 h1 v1 h-1 z M15,26 h2 v1 h-2 z M19,26 h3 v1 h-3 z M23,26 h2 v1 h-2 z
+                            M10,27 h3 v1 h-3 z M14,27 h3 v1 h-3 z M18,27 h1 v1 h-1 z M20,27 h3 v1 h-3 z M25,27 h2 v1 h-2 z
+                        " fill="#000000" />
+                        <rect x="11" y="11" width="7" height="7" fill="#ffffff" rx="1.5" />
+                        <path d="
+                            M12.2,12.5 
+                            L13.1,11.6 
+                            L14.2,12.4 
+                            L14.8,12.4 
+                            L15.8,11.6 
+                            L16.8,12.5 
+                            C17.3,13.3 17.3,15.2 16.7,16.1 
+                            C16.0,16.8 13.0,16.8 12.3,16.1 
+                            C11.7,15.2 11.7,13.3 12.2,12.5 Z
+                        " fill="#000000" />
+                    </svg>
+                </div>
+
+                <div class="ticket-number">Номер: <strong id="randomTicketNumber">802 111</strong></div>
+            </div>
+            
+            <div class="wavy-cutout-bottom"></div>
+        </div>
+
+        <div class="footer-text">
+            Ви зможете повторно відкрити цю сторінку через історію браузера
+        </div>
+    </div>
+
+    <!-- SCREEN 3: DETAILS SCREEN (ОРІГІНАЛЬНА ДОДАТКОВА ІНФОРМАЦІЯ) -->
+    <div id="screen-details" class="screen">
+        <div class="details-screen-content">
+            <div class="back-nav" onclick="showScreen('screen-ticket')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+
+            <div class="details-heading">Деталі квитка</div>
+
+            <div class="details-card">
+                <div class="details-row-top">
+                    <div>
+                        <div class="details-label">Ваш перевізник</div>
+                        <div class="details-val-main" id="detailsCarrier">Тролейбус</div>
+                    </div>
+                    <div class="avatar" style="width: 44px; height: 44px;">
+                        <svg viewBox="0 0 100 100" style="width:28px; height:28px;">
+                            <polygon points="30,34 38,12 48,28" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                            <polygon points="70,34 62,12 52,28" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                            <rect x="26" y="24" width="48" height="48" rx="14" fill="#000000" stroke="#ffffff" stroke-width="3"/>
+                            <rect x="32" y="30" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="35" y="33" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <rect x="54" y="30" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="57" y="33" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <rect x="32" y="52" width="14" height="14" rx="3" fill="#ffffff"/>
+                            <rect x="35" y="55" width="8" height="8" rx="1.5" fill="#000000"/>
+                            <text x="61" y="64" font-family="sans-serif" font-weight="800" font-size="12" fill="#ffffff">%</text>
+                            <ellipse cx="23" cy="46" rx="6" ry="8" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                            <ellipse cx="77" cy="62" rx="8" ry="6" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="details-row-split">
+                    <div>
+                        <div class="details-label">Квиток</div>
+                        <div class="details-val-main">Повний</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="details-label">Вартість</div>
+                        <div class="details-val-price">25 грн</div>
+                    </div>
+                </div>
+
+                <div class="details-item">
+                    <div class="details-label">Код ЄДРПОУ</div>
+                </div>
+
+                <div class="details-item">
+                    <div class="details-label">Основний контакт</div>
+                </div>
+
+                <div class="details-item">
+                    <div class="details-label">Адреса</div>
+                </div>
+
+                <div class="details-item" style="border-top: 1px solid #f0f0f0; padding-top: 16px; margin-top: 16px;">
+                    <div class="details-label">Страховик</div>
+                </div>
+
+                <div class="details-item">
+                    <div class="details-label">Номер договору</div>
+                </div>
+            </div>
+
+            <div class="mono-footer" onclick="openMonoApp()">
+                <div class="mono-logo">monobank<span>Universal Bank</span></div>
+                <div class="mono-divider"></div>
+                <div class="mono-legal">
+                    АТ «УНІВЕРСАЛ БАНК» Ліцензія НБУ №92 від 20.01.1994, у держреєстрі банків №226
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const TICKET_PRICE = 25;
+    let selected3DigitType = "Тролейбус";
+    let currentTransportType = "Тролейбус";
+    let currentRouteNumber = "314";
+
+    let tripCount = parseInt(localStorage.getItem('saved_trips_count')) || 0;
+
+    const monoQuotes = [
+        "Радійтеся людьми і кричіть, що ви живі. Я живий! ◆ Живіть сьогоденням!",
+        "Сьогодні чудовий день, щоб не платити за проїзд ◆ Банку байдуже, контролеру ні",
+        "Спільна банка на штраф від кондуктора ще не створена ◆ Їдемо далі",
+        "Ваш баланс у безпеці, якщо контролер дивиться в інший бік ◆ Стиль моно",
+        "Назззвітність по поїздках: виглядає прибутково ◆ Кешбек не нараховується",
+        "Хвилинка мудрості: зайцем їздити приємно, але бігати від контролерів корисно для кардіо"
+    ];
+
+    const ukMonths = [
+        "січня", "лютого", "березня", "квітня", "травня", "червня",
+        "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"
+    ];
+
+    function openMonoApp() {
+        window.location.href = "https://monobank.ua";
+    }
+
+    function setTheme(themeName) {
+        document.body.className = '';
+        if (themeName !== 'default') {
+            document.body.classList.add('theme-' + themeName);
+        }
+        localStorage.setItem('menu_theme', themeName);
+        toggleMenu();
+    }
+
+    // Відновлення теми
+    const savedTheme = localStorage.getItem('menu_theme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    }
+
+    function setRandomQuote() {
+        const randomIndex = Math.floor(Math.random() * monoQuotes.length);
+        document.getElementById('randomTickerText').textContent = monoQuotes[randomIndex];
+    }
+
+    function getFormattedCurrentDateTime() {
+        const now = new Date();
+        const day = now.getDate();
+        const monthStr = ukMonths[now.getMonth()];
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `Придбано ${day} ${monthStr} о ${hours}:${minutes}`;
+    }
+
+    function updateStatsUI() {
+        document.getElementById('totalTripsCount').textContent = tripCount;
+        document.getElementById('totalMoneySaved').textContent = (tripCount * TICKET_PRICE) + ' грн';
+    }
+
+    function resetStats() {
+        if (confirm("Бажаєте скинути статистику поїздок?")) {
+            tripCount = 0;
+            localStorage.setItem('saved_trips_count', 0);
+            updateStatsUI();
+            toggleMenu();
+        }
+    }
+
+    function generateRandomTicketNumber() {
+        const firstPart = Math.floor(100 + Math.random() * 900);
+        const secondPart = Math.floor(100 + Math.random() * 900);
+        return `${firstPart} ${secondPart}`;
+    }
+
+    function scrollToInput() {
+        setTimeout(() => {
+            document.getElementById('routeInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
+
+    function select3DigitType(type) {
+        selected3DigitType = type;
+        const btnTrolleybus = document.getElementById('btnTrolleybus');
+        const btnTram = document.getElementById('btnTram');
+        
+        if (type === 'Тролейбус') {
+            btnTrolleybus.classList.add('active');
+            btnTram.classList.remove('active');
+        } else {
+            btnTram.classList.add('active');
+            btnTrolleybus.classList.remove('active');
+        }
+    }
+
+    function detectTransportType() {
+        const val = document.getElementById('routeInput').value.trim();
+        const preview = document.getElementById('typePreview');
+        const choiceContainer = document.getElementById('threeDigitChoice');
+        
+        if (val.length === 3) {
+            preview.textContent = "";
+            choiceContainer.style.display = "block";
+            currentTransportType = selected3DigitType;
+        } else if (val.length === 4) {
+            preview.textContent = "Тип: Автобус";
+            choiceContainer.style.display = "none";
+            currentTransportType = "Автобус";
+        } else {
+            preview.textContent = val.length > 0 ? "Введіть 3 цифри (Тролейбус/Трамвай) або 4 цифри (Автобус)" : "";
+            choiceContainer.style.display = "none";
+        }
+    }
+
+    function generateTicket() {
+        const val = document.getElementById('routeInput').value.trim();
+        if (!val) {
+            alert("Будь ласка, введіть номер!");
+            return;
+        }
+
+        if (val.length === 3) {
+            currentTransportType = selected3DigitType;
+        } else if (val.length === 4) {
+            currentTransportType = "Автобус";
+        } else {
+            alert("Номер повинен містити 3 цифри (Тролейбус/Трамвай) або 4 цифри (Автобус)!");
+            return;
+        }
+
+        currentRouteNumber = val;
+
+        tripCount++;
+        localStorage.setItem('saved_trips_count', tripCount);
+        updateStatsUI();
+        setRandomQuote();
+
+        document.getElementById('displayTransportTitle').textContent = currentTransportType;
+        document.getElementById('displayTransportLabel').textContent = currentTransportType;
+        document.getElementById('displayRouteBadge').textContent = '№ ' + currentRouteNumber;
+        document.getElementById('randomTicketNumber').textContent = generateRandomTicketNumber();
+        document.getElementById('detailsCarrier').textContent = currentTransportType;
+        document.getElementById('displayPurchaseDate').textContent = getFormattedCurrentDateTime();
+
+        showScreen('screen-ticket');
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function handleCloseClick(e) {
+        e.stopPropagation();
+        if (document.getElementById('screen-ticket').classList.contains('active')) {
+            showScreen('screen-setup');
+        } else if (document.getElementById('screen-details').classList.contains('active')) {
+            showScreen('screen-ticket');
+        } else if (document.getElementById('screen-dashboard').classList.contains('active')) {
+            showScreen('screen-setup');
+        }
+    }
+
+    function handleFoldClick(e) {
+        e.stopPropagation();
+        showScreen('screen-setup');
+    }
+
+    function handleShareClick(e) {
+        e.stopPropagation();
+        if (navigator.share) {
+            navigator.share({
+                title: 'Квиток',
+                url: window.location.href
+            }).catch(() => {});
+        } else {
+            alert('Посилання скопійовано: pay.mbnk.biz');
+        }
+    }
+
+    let totalSeconds = 59 * 60 + 41;
+    const timerElement = document.getElementById('timer');
+
+    function updateTimer() {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        timerElement.textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (totalSeconds > 0) {
+            totalSeconds--;
+        }
+    }
+
+    setInterval(updateTimer, 1000);
+
+    function toggleMenu(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('dropdownMenu');
+        menu.classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('dropdownMenu');
+        const btn = document.getElementById('menuBtn');
+        if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('active');
+        }
+    });
+
+    updateStatsUI();
+</script>
+
+</body>
+</html>
